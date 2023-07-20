@@ -34,6 +34,7 @@ const SlotMachine: React.FC<SlotMachineProps> = ({ reels, reelHeight }) => {
   }, []);
 
   useEffect(() => {
+    console.log('reels changed');
     calculateDisplayItems();
     let temp: string[][] = [];
     reels.forEach((item) => {

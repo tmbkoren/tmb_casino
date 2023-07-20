@@ -45,6 +45,20 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
     currentReels[0].items.length
   );
   const [formReels, setFormReels] = useState(currentReels);
+  const [validationErrors, setValidatonErrors] = useState<string[]>([]);
+
+  const appendValidationError = (error: string) => {
+    setValidatonErrors((prev) => {
+      const newErrors = [...prev];
+      newErrors.push(error);
+      return newErrors;
+    });
+  };
+
+  const resetValidationErrors = () => {
+    setValidatonErrors([]);
+  };
+
   const {
     register,
     control,
@@ -143,36 +157,80 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
     setValue('reels', formReels);
   }, [formReels]);
 
+  const validateReels = (
+    reels: {
+      reelIndex: number;
+      items: string[];
+      odds: number[];
+    }[],
+    reelsDisplayHeight: number
+  ) => {
+    resetValidationErrors();
+    let isValid = true;
+
+    if (reels.length < 3) {
+      isValid = false;
+      appendValidationError('Reels amount must be greater than 3');
+      return isValid;
+    }
+
+    reels.forEach((reel, index) => {
+      // validate odds
+      let sumOfOdds = 0;
+      reel.odds.forEach((odd) => {
+        sumOfOdds += odd;
+      });
+      if (sumOfOdds !== 100) {
+        isValid = false;
+        appendValidationError(
+          `Sum of odds in reel ${index + 1} is ${sumOfOdds}, it must be 100`
+        );
+      }
+    });
+    if (reelsDisplayHeight % 2 === 0 || reelsDisplayHeight >= reelsLength) {
+      // validate display height
+      isValid = false;
+      appendValidationError(
+        `Reels display height must be odd and less than reels length`
+      );
+    }
+    return isValid;
+  };
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     console.log('aboba3');
     console.log(data);
     const submitReels = data.reels ? data.reels : [];
+    const displayHeight = data.reelsDisplayHeight;
     if (submitReels) {
-      //@ts-ignore I don't understand this error
-      setReels(submitReels);
+      //@ts-ignore submitReels is not undefined
+      if (validateReels(submitReels, displayHeight)) {
+        console.log('aboba4');
+        console.log(submitReels);
+        //@ts-ignore submitReels is not undefined
+        setReels(submitReels);
+        setReelHeight(displayHeight);
+      }
     }
     console.log(submitReels);
-    if (
-      !(
-        data.reelsDisplayHeight % 2 === 0 ||
-        data.reelsDisplayHeight >= reelsLength
-      )
-    ) {
-      console.log('updating reelHeight');
-      setReelHeight(data.reelsDisplayHeight);
-    }
   };
 
   return (
     <form
       onSubmit={(e) => {
         console.log('aboba2');
-        console.log(errors);
         e.preventDefault();
         handleSubmit(onSubmit)();
       }}
       className='flex flex-col gap-3 p-5'
     >
+      {validationErrors.map((error, index) => {
+        return (
+          <div key={`validationError${index}`} className=''>
+            <span className='text-red-500'>{error}</span>
+          </div>
+        );
+      })}
       <label>
         <span className='mr-3'>Amount of reels: </span>
         <input
