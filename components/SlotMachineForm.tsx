@@ -66,6 +66,7 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
     formState: { errors },
     watch,
     setValue,
+    getValues,
   } = useForm({
     resolver: yupResolver(reelsSchema),
     defaultValues: {
@@ -86,6 +87,8 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
   // reelsAmount change
 
   useEffect(() => {
+    //@ts-ignore getValues().reels is not undefined
+    const tempReels = [...getValues().reels];
     const newVal = formReelsAmount;
     const oldVal = amountOfReels;
     if (newVal > oldVal) {
@@ -98,8 +101,8 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
           items: [...Array(reelsLength).fill('')],
           odds: [...Array(reelsLength).fill(0)],
         });
-        setFormReels((prev) => {
-          const newReels = [...prev];
+        setFormReels(() => {
+          const newReels = [...tempReels];
           newReels.push({
             reelIndex: typeof i === 'number' ? i : parseInt(i),
             items: [...Array(reelsLength).fill('')],
@@ -111,8 +114,8 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
     } else if (newVal < oldVal) {
       for (let i = oldVal; i > newVal; --i) {
         remove(i - 1);
-        setFormReels((prev) => {
-          const newReels = [...prev];
+        setFormReels(() => {
+          const newReels = [...tempReels];
           newReels.pop();
           return newReels;
         });
@@ -226,7 +229,10 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
     >
       {validationErrors.map((error, index) => {
         return (
-          <div key={`validationError${index}`} className=''>
+          <div
+            key={`validationError${index}`}
+            className=''
+          >
             <span className='text-red-500'>{error}</span>
           </div>
         );
