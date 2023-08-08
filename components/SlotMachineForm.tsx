@@ -201,27 +201,21 @@ const SlotMachineForm: React.FC<SlotMachineFormProps> = ({
   };
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log('aboba3');
-    console.log(data);
     const submitReels = data.reels ? data.reels : [];
     const displayHeight = data.reelsDisplayHeight;
     if (submitReels) {
       //@ts-ignore submitReels is not undefined
       if (validateReels(submitReels, displayHeight)) {
-        console.log('aboba4');
-        console.log(submitReels);
         //@ts-ignore submitReels is not undefined
         setReels(submitReels);
         setReelHeight(displayHeight);
       }
     }
-    console.log(submitReels);
   };
 
   return (
     <form
       onSubmit={(e) => {
-        console.log('aboba2');
         e.preventDefault();
         handleSubmit(onSubmit)();
       }}
